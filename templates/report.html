@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vulnerability Scan Report - {{ target_url }}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            line-height: 1.6;
+        }
+        .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+        header {
+            background: linear-gradient(135deg, #16213e, #0f3460);
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        header h1 { font-size: 24px; color: #e94560; margin-bottom: 10px; }
+        header p { color: #aaa; font-size: 14px; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: #16213e;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-card .number { font-size: 32px; font-weight: bold; }
+        .stat-card .label { font-size: 12px; color: #888; text-transform: uppercase; }
+        .critical .number { color: #ff4444; }
+        .high .number { color: #ff8800; }
+        .medium .number { color: #ffcc00; }
+        .low .number { color: #88cc88; }
+        .total .number { color: #e94560; }
+        .disclaimer {
+            background: #2d1b1b;
+            border-left: 4px solid #e94560;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 13px;
+        }
+        .section { margin: 25px 0; }
+        .section h2 {
+            color: #e94560;
+            font-size: 18px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #333;
+        }
+        .finding {
+            background: #16213e;
+            border-radius: 8px;
+            padding: 18px;
+            margin-bottom: 12px;
+            border-left: 4px solid #888;
+        }
+        .finding.sev-CRITICAL { border-left-color: #ff4444; }
+        .finding.sev-HIGH { border-left-color: #ff8800; }
+        .finding.sev-MEDIUM { border-left-color: #ffcc00; }
+        .finding.sev-LOW { border-left-color: #88cc88; }
+        .finding-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .severity-badge {
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .badge-CRITICAL { background: #ff4444; color: white; }
+        .badge-HIGH { background: #ff8800; color: white; }
+        .badge-MEDIUM { background: #ffcc00; color: #333; }
+        .badge-LOW { background: #88cc88; color: #333; }
+        .finding-details { font-size: 13px; color: #bbb; }
+        .finding-details span { display: inline-block; margin-right: 20px; }
+        .finding-details .label { color: #666; }
+        .evidence {
+            background: #0d1117;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            margin-top: 8px;
+            color: #e94560;
+        }
+        footer {
+            text-align: center;
+            color: #555;
+            font-size: 12px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Web Vulnerability Scan Report</h1>
+            <p>Target: <strong>{{ target_url }}</strong></p>
+            <p>Scan Date: {{ scan_date }} | Duration: {{ scan_duration }}</p>
+        </header>
+
+        <div class="disclaimer">
+            This scan was performed for educational and authorized testing purposes only.
+            Findings should be verified manually before taking remediation action.
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card total">
+                <div class="number">{{ stats.total }}</div>
+                <div class="label">Total Findings</div>
+            </div>
+            <div class="stat-card critical">
+                <div class="number">{{ stats.critical }}</div>
+                <div class="label">Critical</div>
+            </div>
+            <div class="stat-card high">
+                <div class="number">{{ stats.high }}</div>
+                <div class="label">High</div>
+            </div>
+            <div class="stat-card medium">
+                <div class="number">{{ stats.medium }}</div>
+                <div class="label">Medium</div>
+            </div>
+            <div class="stat-card low">
+                <div class="number">{{ stats.low }}</div>
+                <div class="label">Low</div>
+            </div>
+        </div>
+
+        {% for severity in ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'] %}
+        {% if by_severity[severity] %}
+        <div class="section">
+            <h2>{{ severity }} Findings ({{ by_severity[severity]|length }})</h2>
+            {% for finding in by_severity[severity] %}
+            <div class="finding sev-{{ finding.severity }}">
+                <div class="finding-header">
+                    <strong>{{ finding.type }}</strong>
+                    <span class="severity-badge badge-{{ finding.severity }}">{{ finding.severity }}</span>
+                </div>
+                <p>{{ finding.description }}</p>
+                <div class="finding-details">
+                    <span><span class="label">URL:</span> {{ finding.url }}</span>
+                    <span><span class="label">Param:</span> {{ finding.parameter }}</span>
+                    <span><span class="label">Method:</span> {{ finding.method }}</span>
+                </div>
+                {% if finding.payload and finding.payload != 'N/A' %}
+                <div class="evidence">Payload: {{ finding.payload }}</div>
+                {% endif %}
+                {% if finding.evidence %}
+                <div class="evidence">{{ finding.evidence }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endfor %}
+
+        <footer>
+            Generated by web-vuln-scanner | For educational and authorized testing ONLY
+        </footer>
+    </div>
+</body>
+</html>
