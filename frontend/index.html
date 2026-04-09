@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VulnScan</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#000;--card:rgba(28,28,30,0.8);--border:rgba(255,255,255,0.08);--text:#F5F5F7;--sub:#86868B;--accent:#2997FF;--radius:18px;--font:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter',system-ui,sans-serif;--crit:#FF453A;--high:#FF9F0A;--med:#FFD60A;--low:#30D158;--info:#64D2FF}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-decoration:none;transition:opacity .3s ease}
+a:hover{opacity:.8}
+.container{max-width:1120px;margin:0 auto;padding:0 24px}
+section{padding:100px 0}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(0,0,0,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:16px 0}
+nav .container{display:flex;justify-content:space-between;align-items:center}
+nav h1{font-size:18px;font-weight:600;letter-spacing:-0.02em}
+nav .links{display:flex;gap:24px;align-items:center}
+nav .links a{color:var(--sub);font-size:14px}
+.pill{display:inline-block;padding:8px 22px;border-radius:100px;font-size:14px;font-weight:500;transition:all .3s ease;cursor:pointer;border:none}
+.pill-primary{background:var(--accent);color:#fff}
+.pill-primary:hover{background:#1a8aed;opacity:1}
+.pill-outline{border:1px solid rgba(255,255,255,0.2);color:var(--text);background:transparent}
+.pill-outline:hover{border-color:rgba(255,255,255,0.4);opacity:1}
+
+.hero{padding:160px 0 80px;text-align:center}
+.hero h2{font-size:clamp(40px,6vw,64px);font-weight:700;letter-spacing:-0.03em;line-height:1.1;margin-bottom:16px}
+.hero p{font-size:20px;color:var(--sub);max-width:540px;margin:0 auto 40px}
+.hero .tech-stack{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.tech-tag{padding:6px 16px;border-radius:100px;border:1px solid var(--border);font-size:13px;color:var(--sub)}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;padding:60px 0}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);backdrop-filter:blur(20px);padding:32px;text-align:center;transition:transform .3s ease}
+.stat-card:hover{transform:translateY(-4px)}
+.stat-card .value{font-size:40px;font-weight:700;letter-spacing:-0.03em}
+.stat-card .label{font-size:14px;color:var(--sub);margin-top:4px}
+
+.section-title{font-size:clamp(28px,4vw,40px);font-weight:700;letter-spacing:-0.02em;text-align:center;margin-bottom:16px}
+.section-sub{font-size:16px;color:var(--sub);text-align:center;margin-bottom:60px;max-width:520px;margin-left:auto;margin-right:auto}
+
+/* Scanner */
+.scanner-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);backdrop-filter:blur(20px);padding:40px;max-width:640px;margin:0 auto}
+.scanner-row{display:flex;gap:12px}
+#domain-input{flex:1;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:12px;padding:12px 18px;color:var(--text);font-family:var(--font);font-size:15px;transition:border .3s ease}
+#domain-input:focus{outline:none;border-color:var(--accent)}
+.scan-progress{margin-top:20px;display:none}
+.progress-bar{width:100%;height:6px;border-radius:3px;background:rgba(255,255,255,0.06);overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;background:var(--accent);width:0;transition:width .4s ease}
+.progress-label{font-size:13px;color:var(--sub);margin-top:8px}
+
+/* Results */
+#results-section{display:none}
+.check-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:680px){.check-grid{grid-template-columns:1fr}}
+.check-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);backdrop-filter:blur(20px);padding:28px;transition:all .3s ease}
+.check-card:hover{border-color:rgba(255,255,255,0.15)}
+.check-card h4{font-size:15px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.check-status{display:inline-block;width:10px;height:10px;border-radius:50%}
+.status-pass{background:var(--low)}.status-warn{background:var(--med)}.status-fail{background:var(--crit)}.status-info{background:var(--info)}
+.check-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.check-row:last-child{border-bottom:none}
+.check-row .name{color:var(--sub)}
+.check-row .val{font-weight:500}
+.check-row .val.pass{color:var(--low)}.check-row .val.fail{color:var(--crit)}.check-row .val.warn{color:var(--med)}
+
+/* Grade */
+.grade-display{text-align:center;padding:20px}
+.grade-letter{font-size:72px;font-weight:800;line-height:1;letter-spacing:-0.04em}
+.grade-label{font-size:14px;color:var(--sub);margin-top:8px}
+.grade-A{color:#30D158}.grade-B{color:#2997FF}.grade-C{color:#FFD60A}.grade-D{color:#FF9F0A}.grade-F{color:#FF453A}
+
+/* Severity bar */
+.sev-bar-wrap{margin-top:40px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);backdrop-filter:blur(20px);padding:28px}
+.sev-bar-wrap h4{font-size:15px;font-weight:600;margin-bottom:16px}
+.sev-bar{display:flex;height:32px;border-radius:8px;overflow:hidden;width:100%}
+.sev-bar div{transition:width .6s ease}
+.sev-legend{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap}
+.sev-legend span{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--sub)}
+.sev-legend .dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+
+/* Report */
+.report-section{text-align:center;margin-top:40px}
+
+footer{border-top:1px solid var(--border);padding:40px 0;text-align:center}
+footer p{color:var(--sub);font-size:14px}
+
+@media(max-width:680px){
+  nav .links{gap:14px}
+  .scanner-row{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <h1>VulnScan</h1>
+    <div class="links">
+      <a href="#scanner">Scanner</a>
+      <a href="#results-section">Results</a>
+      <a href="https://github.com/Vikrant892/web-vuln-scanner" target="_blank" class="pill pill-outline">GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container">
+    <h2>Web Vulnerability Assessment</h2>
+    <p>Automated security checks for domains including XSS, SQLi, header analysis, and SSL/TLS verification.</p>
+    <div class="tech-stack">
+      <span class="tech-tag">Python</span>
+      <span class="tech-tag">BeautifulSoup</span>
+      <span class="tech-tag">Requests</span>
+      <span class="tech-tag">Jinja2</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="stats">
+      <div class="stat-card"><div class="value" id="stat-domains">0</div><div class="label">Domains Scanned</div></div>
+      <div class="stat-card"><div class="value" id="stat-vulns">0</div><div class="label">Vulnerabilities Found</div></div>
+      <div class="stat-card"><div class="value" id="stat-headers">0</div><div class="label">Headers Checked</div></div>
+      <div class="stat-card"><div class="value" id="stat-score">--</div><div class="label">Average Score</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="scanner">
+  <div class="container">
+    <h3 class="section-title">Domain Scanner</h3>
+    <p class="section-sub">Enter a domain or URL to run a simulated security assessment across multiple check categories.</p>
+    <div class="scanner-card">
+      <div class="scanner-row">
+        <input type="text" id="domain-input" placeholder="example.com" spellcheck="false">
+        <button class="pill pill-primary" onclick="startScan()">Scan</button>
+      </div>
+      <div class="scan-progress" id="scan-progress">
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        <div class="progress-label" id="progress-label">Initializing scan...</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="results-section">
+  <div class="container">
+    <h3 class="section-title" id="results-title">Scan Results</h3>
+    <p class="section-sub" id="results-domain"></p>
+
+    <div class="check-grid">
+      <div class="check-card" id="card-xss">
+        <h4><span class="check-status" id="status-xss"></span>XSS Detection</h4>
+        <div id="xss-results"></div>
+      </div>
+      <div class="check-card" id="card-sqli">
+        <h4><span class="check-status" id="status-sqli"></span>SQL Injection</h4>
+        <div id="sqli-results"></div>
+      </div>
+      <div class="check-card">
+        <h4>Security Headers</h4>
+        <div class="grade-display">
+          <div class="grade-letter" id="header-grade">--</div>
+          <div class="grade-label">Header Security Grade</div>
+        </div>
+        <div id="header-results"></div>
+      </div>
+      <div class="check-card" id="card-ssl">
+        <h4><span class="check-status" id="status-ssl"></span>SSL/TLS</h4>
+        <div id="ssl-results"></div>
+      </div>
+    </div>
+
+    <div class="sev-bar-wrap">
+      <h4>Severity Breakdown</h4>
+      <div class="sev-bar" id="sev-bar"></div>
+      <div class="sev-legend" id="sev-legend"></div>
+    </div>
+
+    <div class="report-section">
+      <button class="pill pill-primary" onclick="downloadReport()">Download Report</button>
+      <button class="pill pill-outline" style="margin-left:12px" onclick="resetScanner()">New Scan</button>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>Built by Vikrant Sharma &middot; <a href="https://github.com/Vikrant892/web-vuln-scanner" target="_blank">View on GitHub</a></p>
+  </div>
+</footer>
+
+<script>
+let scanCount = 0;
+let lastReport = '';
+
+function seedRandom(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) { h = ((h << 5) - h) + str.charCodeAt(i); h |= 0; }
+  return function() { h = (h * 16807 + 0) % 2147483647; return (h & 0x7fffffff) / 2147483647; };
+}
+
+function simulateScan(domain) {
+  const rng = seedRandom(domain);
+  const r = () => rng();
+
+  const xssPayloads = [
+    { payload: '<script>alert(1)</script>', field: 'search parameter' },
+    { payload: '"><img src=x onerror=alert(1)>', field: 'comment input' },
+    { payload: "javascript:alert(document.cookie)", field: 'href attribute' },
+    { payload: '<svg/onload=alert(1)>', field: 'profile field' }
+  ];
+  const xssResults = xssPayloads.map(p => ({
+    ...p,
+    vulnerable: r() > 0.55
+  }));
+
+  const sqliPayloads = [
+    { payload: "' OR 1=1 --", field: 'login form' },
+    { payload: "1; DROP TABLE users", field: 'id parameter' },
+    { payload: "' UNION SELECT null,null --", field: 'search query' },
+    { payload: "1' AND SLEEP(5) --", field: 'filter input' }
+  ];
+  const sqliResults = sqliPayloads.map(p => ({
+    ...p,
+    vulnerable: r() > 0.6
+  }));
+
+  const headers = [
+    { name: 'X-Frame-Options', present: r() > 0.3 },
+    { name: 'Content-Security-Policy', present: r() > 0.5 },
+    { name: 'Strict-Transport-Security', present: r() > 0.35 },
+    { name: 'X-Content-Type-Options', present: r() > 0.25 },
+    { name: 'Referrer-Policy', present: r() > 0.45 },
+    { name: 'Permissions-Policy', present: r() > 0.55 }
+  ];
+  const headerScore = headers.filter(h => h.present).length;
+  const headerGrade = headerScore >= 5 ? 'A' : headerScore >= 4 ? 'B' : headerScore >= 3 ? 'C' : headerScore >= 2 ? 'D' : 'F';
+
+  const protocols = ['TLS 1.2', 'TLS 1.3'];
+  const ssl = {
+    valid: r() > 0.15,
+    protocol: protocols[Math.floor(r() * protocols.length)],
+    issuer: r() > 0.5 ? "Let's Encrypt" : 'DigiCert',
+    daysLeft: Math.floor(r() * 300) + 30,
+    certStrength: r() > 0.3 ? '256-bit' : '128-bit'
+  };
+
+  const xssVulnCount = xssResults.filter(x => x.vulnerable).length;
+  const sqliVulnCount = sqliResults.filter(s => s.vulnerable).length;
+  const critCount = sqliVulnCount;
+  const highCount = xssVulnCount;
+  const medCount = headers.filter(h => !h.present).length;
+  const lowCount = ssl.valid ? 0 : 1;
+  const infoCount = 2;
+  const totalFindings = critCount + highCount + medCount + lowCount + infoCount;
+  const score = Math.max(0, Math.round(100 - critCount * 20 - highCount * 12 - medCount * 5 - lowCount * 8));
+
+  return { domain, xssResults, sqliResults, headers, headerGrade, headerScore, ssl, severity: { critical: critCount, high: highCount, medium: medCount, low: lowCount, info: infoCount }, totalFindings, score };
+}
+
+function renderCheckRows(items, isVuln) {
+  return items.map(item => {
+    const cls = isVuln ? (item.vulnerable ? 'fail' : 'pass') : (item.present ? 'pass' : 'fail');
+    const label = isVuln ? (item.vulnerable ? 'Vulnerable' : 'Safe') : (item.present ? 'Present' : 'Missing');
+    return `<div class="check-row"><span class="name">${item.payload || item.name}${item.field ? ` <span style="opacity:.5">(${item.field})</span>` : ''}</span><span class="val ${cls}">${label}</span></div>`;
+  }).join('');
+}
+
+function startScan() {
+  const input = document.getElementById('domain-input');
+  let domain = input.value.trim().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+  if (!domain) { input.focus(); return; }
+
+  const progress = document.getElementById('scan-progress');
+  const fill = document.getElementById('progress-fill');
+  const label = document.getElementById('progress-label');
+  progress.style.display = 'block';
+  document.getElementById('results-section').style.display = 'none';
+
+  const steps = [
+    { pct: 15, text: 'Resolving domain...' },
+    { pct: 30, text: 'Testing XSS payloads...' },
+    { pct: 50, text: 'Testing SQL injection...' },
+    { pct: 70, text: 'Checking security headers...' },
+    { pct: 85, text: 'Verifying SSL/TLS...' },
+    { pct: 100, text: 'Generating report...' }
+  ];
+
+  let i = 0;
+  const interval = setInterval(() => {
+    if (i < steps.length) {
+      fill.style.width = steps[i].pct + '%';
+      label.textContent = steps[i].text;
+      i++;
+    } else {
+      clearInterval(interval);
+      setTimeout(() => {
+        progress.style.display = 'none';
+        fill.style.width = '0%';
+        renderResults(simulateScan(domain));
+      }, 400);
+    }
+  }, 500);
+}
+
+function renderResults(data) {
+  scanCount++;
+  document.getElementById('stat-domains').textContent = scanCount;
+  document.getElementById('stat-vulns').textContent = data.totalFindings;
+  document.getElementById('stat-headers').textContent = data.headers.length;
+  document.getElementById('stat-score').textContent = data.score + '/100';
+
+  document.getElementById('results-domain').textContent = data.domain;
+
+  const xssVuln = data.xssResults.some(x => x.vulnerable);
+  document.getElementById('status-xss').className = 'check-status ' + (xssVuln ? 'status-fail' : 'status-pass');
+  document.getElementById('xss-results').innerHTML = renderCheckRows(data.xssResults, true);
+
+  const sqliVuln = data.sqliResults.some(s => s.vulnerable);
+  document.getElementById('status-sqli').className = 'check-status ' + (sqliVuln ? 'status-fail' : 'status-pass');
+  document.getElementById('sqli-results').innerHTML = renderCheckRows(data.sqliResults, true);
+
+  const gradeEl = document.getElementById('header-grade');
+  gradeEl.textContent = data.headerGrade;
+  gradeEl.className = 'grade-letter grade-' + data.headerGrade;
+  document.getElementById('header-results').innerHTML = renderCheckRows(data.headers, false);
+
+  document.getElementById('status-ssl').className = 'check-status ' + (data.ssl.valid ? 'status-pass' : 'status-fail');
+  document.getElementById('ssl-results').innerHTML = [
+    { name: 'Certificate', payload: 'Valid', field: null, present: data.ssl.valid },
+    { name: 'Protocol', payload: data.ssl.protocol, field: null, present: true },
+    { name: 'Issuer', payload: data.ssl.issuer, field: null, present: true },
+    { name: 'Expires in', payload: data.ssl.daysLeft + ' days', field: null, present: data.ssl.daysLeft > 30 },
+    { name: 'Strength', payload: data.ssl.certStrength, field: null, present: data.ssl.certStrength === '256-bit' }
+  ].map(item => `<div class="check-row"><span class="name">${item.name}</span><span class="val ${item.present ? 'pass' : 'warn'}">${item.payload}</span></div>`).join('');
+
+  const sev = data.severity;
+  const total = sev.critical + sev.high + sev.medium + sev.low + sev.info || 1;
+  const colors = { critical: '#FF453A', high: '#FF9F0A', medium: '#FFD60A', low: '#30D158', info: '#64D2FF' };
+  const bar = document.getElementById('sev-bar');
+  const legend = document.getElementById('sev-legend');
+  bar.innerHTML = '';
+  legend.innerHTML = '';
+  Object.entries(sev).forEach(([key, count]) => {
+    if (count > 0) {
+      const pct = (count / total) * 100;
+      bar.innerHTML += `<div style="width:${pct}%;background:${colors[key]}"></div>`;
+    }
+    legend.innerHTML += `<span><span class="dot" style="background:${colors[key]}"></span>${key.charAt(0).toUpperCase() + key.slice(1)}: ${count}</span>`;
+  });
+
+  lastReport = generateReportText(data);
+  document.getElementById('results-section').style.display = 'block';
+  document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
+}
+
+function generateReportText(data) {
+  const lines = [];
+  lines.push('VULNSCAN SECURITY ASSESSMENT REPORT');
+  lines.push('='.repeat(40));
+  lines.push(`Domain: ${data.domain}`);
+  lines.push(`Date: ${new Date().toISOString().split('T')[0]}`);
+  lines.push(`Overall Score: ${data.score}/100`);
+  lines.push(`Header Grade: ${data.headerGrade}`);
+  lines.push('');
+  lines.push('XSS DETECTION');
+  lines.push('-'.repeat(30));
+  data.xssResults.forEach(x => {
+    lines.push(`  [${x.vulnerable ? 'VULN' : 'SAFE'}] ${x.payload} (${x.field})`);
+  });
+  lines.push('');
+  lines.push('SQL INJECTION');
+  lines.push('-'.repeat(30));
+  data.sqliResults.forEach(s => {
+    lines.push(`  [${s.vulnerable ? 'VULN' : 'SAFE'}] ${s.payload} (${s.field})`);
+  });
+  lines.push('');
+  lines.push('SECURITY HEADERS');
+  lines.push('-'.repeat(30));
+  data.headers.forEach(h => {
+    lines.push(`  [${h.present ? 'OK  ' : 'MISS'}] ${h.name}`);
+  });
+  lines.push('');
+  lines.push('SSL/TLS');
+  lines.push('-'.repeat(30));
+  lines.push(`  Protocol: ${data.ssl.protocol}`);
+  lines.push(`  Issuer: ${data.ssl.issuer}`);
+  lines.push(`  Valid: ${data.ssl.valid ? 'Yes' : 'No'}`);
+  lines.push(`  Expires in: ${data.ssl.daysLeft} days`);
+  lines.push(`  Strength: ${data.ssl.certStrength}`);
+  lines.push('');
+  lines.push('SEVERITY BREAKDOWN');
+  lines.push('-'.repeat(30));
+  Object.entries(data.severity).forEach(([k, v]) => {
+    lines.push(`  ${k.toUpperCase()}: ${v}`);
+  });
+  lines.push('');
+  lines.push('Report generated by VulnScan');
+  lines.push('https://github.com/Vikrant892/web-vuln-scanner');
+  return lines.join('\n');
+}
+
+function downloadReport() {
+  if (!lastReport) return;
+  const blob = new Blob([lastReport], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'vulnscan-report.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function resetScanner() {
+  document.getElementById('results-section').style.display = 'none';
+  document.getElementById('domain-input').value = '';
+  document.getElementById('domain-input').focus();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.getElementById('domain-input').addEventListener('keydown', e => { if (e.key === 'Enter') startScan(); });
+</script>
+</body>
+</html>
