@@ -128,7 +128,7 @@ async function run(){
   lines.push(['ok','[+] cert: CN='+url.replace(/https?:\/\//,'').split('/')[0]+', expires 2026-08-14']);
   lines.push(['dim','']);
   lines.push(['info','[*] phase 4/5: xss probes (passive, payloads not sent)']);
-  lines.push(['dim','[+] payload: <script>alert(1)</script>  — tested: NO (passive)']);
+  lines.push(['dim','[+] payload: <script>alert(1)<\/script>  — tested: NO (passive)']);
   lines.push(['dim','[+] payload: "><img src=x onerror=alert(1)>  — tested: NO (passive)']);
   if(xssHit){lines.push(['bad','[!] reflection signal on /search?q= param  — [HIGH]']);findings.push({sev:'HIGH',f:'Potential reflected XSS in /search',mod:'xss',ref:'CWE-79'})}
   lines.push(['dim','']);
