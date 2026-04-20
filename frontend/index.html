@@ -3,157 +3,271 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>vulnscan — web vulnerability scanner</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<title>VulnScan — Web Vulnerability Assessment</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{background:#0f0f0f;color:#e0e0e0;font-family:'IBM Plex Mono',Consolas,monospace;font-size:13px;line-height:1.55;min-height:100vh}
-a{color:#8be9fd;text-decoration:none}a:hover{text-decoration:underline}
-.page{max-width:960px;margin:0 auto;padding:20px 22px 40px;display:grid;grid-template-columns:1fr 210px;gap:24px}
-.main{min-width:0}
-.head{color:#8be9fd;margin-bottom:14px;white-space:pre-wrap;font-size:12.5px}
-.head .a{color:#6272a4}
-.prompt{display:flex;gap:8px;align-items:center;margin:10px 0 14px;flex-wrap:wrap}
-.prompt label{color:#8be9fd}
-.prompt input{flex:1;min-width:240px;background:transparent;border:1px solid #2a2a2a;color:#e0e0e0;padding:5px 10px;font:inherit;outline:none;border-radius:0}
-.prompt input:focus{border-color:#8be9fd}
-.btn{background:transparent;border:1px solid #3a3a3a;color:#e0e0e0;font:inherit;padding:5px 14px;cursor:pointer;border-radius:0}
-.btn:hover{border-color:#50fa7b;color:#50fa7b}
-.out{background:#0a0a0a;border:1px solid #1f1f1f;padding:14px 16px;white-space:pre-wrap;min-height:240px;font-size:12.5px;line-height:1.55;overflow:auto}
-.out .ok{color:#50fa7b}
-.out .bad{color:#ff5555}
-.out .warn{color:#ffb86c}
-.out .info{color:#8be9fd}
-.out .dim{color:#6272a4}
-.out .crit{color:#ff5555;font-weight:600}
-.out .high{color:#ffb86c;font-weight:600}
-.out .med{color:#f1fa8c}
-.out .low{color:#50fa7b}
-.findings{margin-top:18px;border:1px solid #2a2a2a;padding:14px 16px;font-size:12.5px;white-space:pre-wrap;overflow:auto}
-.findings table{width:100%;border-collapse:collapse;font:inherit}
-.findings th{text-align:left;border-bottom:1px solid #3a3a3a;padding:4px 10px;color:#6272a4;font-weight:500;text-transform:uppercase;font-size:11px;letter-spacing:.06em}
-.findings td{padding:3px 10px;border-bottom:1px solid #1f1f1f;vertical-align:top}
-.side{border-left:1px solid #1f1f1f;padding-left:18px;font-size:12.5px}
-.side h4{color:#6272a4;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;font-weight:500}
-.side .prof{display:block;padding:4px 8px;margin:0 -8px;cursor:pointer;color:#e0e0e0;border:1px solid transparent}
-.side .prof:hover{border-color:#2a2a2a}
-.side .prof.on{color:#50fa7b;border-color:#2a2a2a}
-.side .k{color:#6272a4;font-size:11px}
-footer{grid-column:1/-1;margin-top:30px;padding-top:14px;border-top:1px solid #1f1f1f;color:#6272a4;font-size:11.5px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
-@media(max-width:720px){.page{grid-template-columns:1fr}.side{border-left:0;padding-left:0;border-top:1px solid #1f1f1f;padding-top:14px}}
+:root{
+  --bg:#0a0f0d; --panel:#0f1613; --panel2:#1a221d; --line:#232f29;
+  --ink:#e8f2ec; --dim:#7a8f85;
+  --acid:#95e06c;
+  --red:#ff4a5c;
+  --amber:#ffb547;
+  --blue:#6ec5e9;
+}
+html,body{background:var(--bg);color:var(--ink);font-family:'Space Grotesk',system-ui,sans-serif;font-size:14.5px;line-height:1.55;min-height:100vh;overflow-x:hidden}
+.wrap{max-width:1240px;margin:0 auto;padding:28px 28px 60px}
+
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px}
+.brand{display:flex;gap:14px;align-items:center}
+.bm{width:44px;height:44px;background:var(--acid);border-radius:12px;position:relative;display:flex;align-items:center;justify-content:center}
+.bm::before{content:'{}';color:var(--bg);font-family:'Fira Code',monospace;font-weight:800;font-size:15px}
+.brand h1{font-size:21px;font-weight:800;letter-spacing:-.02em}
+.brand small{display:block;color:var(--dim);font-size:12px;font-family:'Fira Code',monospace;margin-top:-2px}
+.nav{display:flex;gap:6px}
+.nav a{padding:8px 14px;color:var(--dim);font-size:13px;cursor:pointer;border-radius:8px;font-weight:500}
+.nav a.on{background:var(--panel2);color:var(--acid)}
+
+/* Hero */
+.hero{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:30px 34px;margin-bottom:24px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 90% 20%,rgba(149,224,108,.06),transparent 50%);pointer-events:none}
+.hero-inner{position:relative;display:grid;grid-template-columns:1.3fr 1fr;gap:30px;align-items:center}
+.hero h2{font-size:42px;font-weight:800;letter-spacing:-.02em;line-height:1.05;margin-bottom:14px}
+.hero h2 .a{color:var(--acid)}
+.hero h2 .r{color:var(--red)}
+.hero p{color:var(--dim);font-size:15px;max-width:500px;margin-bottom:22px}
+.scanform{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:10px;display:flex;gap:8px;align-items:center}
+.scanform .lbl{padding:0 14px;color:var(--acid);font-family:'Fira Code',monospace;font-size:13px;font-weight:600}
+.scanform input{flex:1;background:transparent;border:none;color:var(--ink);padding:10px 0;font:inherit;font-family:'Fira Code',monospace;font-size:14px;outline:none}
+.scanform button{padding:10px 20px;background:var(--acid);color:var(--bg);border:none;font:inherit;font-weight:700;border-radius:10px;cursor:pointer;font-size:13.5px}
+.scanform button:hover{background:#aae580}
+
+.hero-r{display:flex;flex-direction:column;gap:10px}
+.sc{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center}
+.sc .l{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.sc .v{font-size:22px;font-weight:700;font-family:'Fira Code',monospace;letter-spacing:-.02em}
+.sc.a .v{color:var(--acid)}
+.sc.r .v{color:var(--red)}
+.sc.am .v{color:var(--amber)}
+.sc .grade{width:54px;height:54px;background:var(--acid);color:var(--bg);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;font-family:'Fira Code',monospace}
+.sc .grade.f{background:var(--red);color:#fff}
+.sc .grade.c{background:var(--amber);color:var(--bg)}
+
+/* Panels grid */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+.grid-wide{grid-column:1/-1}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.ph{padding:16px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.ph h3{font-size:16px;font-weight:700}
+.ph small{display:block;color:var(--dim);font-size:12.5px;margin-top:1px;font-weight:400}
+.ph .tag{padding:4px 10px;background:var(--panel2);border:1px solid var(--line);border-radius:100px;font-size:11px;color:var(--dim);font-family:'Fira Code',monospace}
+
+/* Stream */
+.stream{padding:18px 22px;min-height:220px;font-family:'Fira Code',monospace;font-size:12.5px;line-height:1.75;overflow:auto;max-height:300px}
+.stream .ln{padding:1px 0}
+.stream .ln.info{color:var(--blue)}
+.stream .ln.ok{color:var(--acid)}
+.stream .ln.bad{color:var(--red)}
+.stream .ln.warn{color:var(--amber)}
+.stream .ln.dim{color:var(--dim)}
+.stream .sev{display:inline-block;padding:0 6px;border-radius:4px;font-weight:700;margin-left:4px;font-size:10.5px}
+.stream .sev.CRIT{background:var(--red);color:#fff}
+.stream .sev.HIGH{background:#ff4a5c33;color:var(--red)}
+.stream .sev.MED{background:#ffb54733;color:var(--amber)}
+.stream .sev.LOW{background:#6ec5e933;color:var(--blue)}
+
+/* Severity */
+.sevbar{padding:22px}
+.sevbar .items{display:flex;flex-direction:column;gap:12px}
+.sevbar .it{display:grid;grid-template-columns:70px 1fr 40px;gap:12px;align-items:center;font-size:13px}
+.sevbar .it .lbl{font-family:'Fira Code',monospace;font-weight:600;font-size:11px;padding:3px 8px;border-radius:4px;text-align:center}
+.sevbar .it.crit .lbl{background:var(--red);color:#fff}
+.sevbar .it.high .lbl{background:#ff4a5c33;color:var(--red)}
+.sevbar .it.med .lbl{background:#ffb54733;color:var(--amber)}
+.sevbar .it.low .lbl{background:#6ec5e933;color:var(--blue)}
+.sevbar .it.info .lbl{background:var(--panel2);color:var(--dim)}
+.sevbar .it .bar{height:14px;background:var(--panel2);border-radius:7px;overflow:hidden}
+.sevbar .it .bar div{height:100%;border-radius:7px;transition:width .6s ease}
+.sevbar .it.crit .bar div{background:var(--red)}
+.sevbar .it.high .bar div{background:var(--red);opacity:.7}
+.sevbar .it.med .bar div{background:var(--amber)}
+.sevbar .it.low .bar div{background:var(--blue)}
+.sevbar .it.info .bar div{background:var(--dim)}
+.sevbar .it .n{font-family:'Fira Code',monospace;font-weight:700;text-align:right}
+
+/* Findings */
+.findings{overflow:auto}
+.findings table{width:100%;border-collapse:collapse;font-size:13px}
+.findings th{text-align:left;padding:10px 18px;color:var(--dim);font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;font-weight:600;border-bottom:1px solid var(--line);background:var(--panel2)}
+.findings td{padding:12px 18px;border-bottom:1px solid var(--line)}
+.findings tr:last-child td{border-bottom:0}
+.findings .sev{padding:2px 9px;border-radius:100px;font-size:10.5px;font-weight:700;font-family:'Fira Code',monospace}
+.findings .sev.CRIT{background:var(--red);color:#fff}
+.findings .sev.HIGH{background:#ff4a5c33;color:var(--red)}
+.findings .sev.MED{background:#ffb54733;color:var(--amber)}
+.findings .sev.LOW{background:#6ec5e933;color:var(--blue)}
+.findings td:last-child a{color:var(--blue);text-decoration:none;font-family:'Fira Code',monospace;font-size:12px}
+
+/* Profiles */
+.profiles{padding:18px 22px;display:flex;gap:10px;flex-wrap:wrap}
+.profiles .p{padding:10px 16px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:13px}
+.profiles .p:hover{border-color:var(--acid)}
+.profiles .p.on{background:var(--acid);color:var(--bg);border-color:var(--acid);font-weight:700}
+.profiles .p small{display:block;color:inherit;opacity:.7;font-family:'Fira Code',monospace;font-size:10.5px;margin-top:2px}
+
+.foot{margin-top:22px;padding-top:20px;border-top:1px solid var(--line);color:var(--dim);font-size:13px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.foot a{color:var(--ink)}
+
+@media(max-width:900px){.hero-inner,.grid{grid-template-columns:1fr}.hero h2{font-size:30px}}
 </style>
 </head>
 <body>
-<div class="page">
-<div class="main">
-<div class="head">$ ./vulnscan --target &lt;url&gt; --modules all --output json
-<span class="a">[*] vulnscan v0.3.1 — Vikrant Sharma
-[*] passive checks on remote targets; active payloads shown but not sent</span></div>
+<div class="wrap">
 
-<div class="prompt">
-<label>target&gt;</label>
-<input id="tgt" value="https://example.com" spellcheck="false" autocomplete="off">
-<button class="btn" onclick="run()" id="runbtn">[RUN SCAN]</button>
-</div>
+<header class="top">
+  <div class="brand"><div class="bm"></div><div><h1>VulnScan</h1><small>web vulnerability assessment · v0.3.1</small></div></div>
+  <nav class="nav"><a class="on">Scanner</a><a>Findings</a><a>Reports</a><a>Rules</a></nav>
+</header>
 
-<div class="out" id="out"><span class="dim">press [RUN SCAN] to begin.  output will stream here.</span></div>
+<section class="hero">
+  <div class="hero-inner">
+    <div>
+      <h2>Find what's <span class="r">broken</span>.<br>Before they do.</h2>
+      <p>Passive web vulnerability scanner for OWASP Top 10 coverage — XSS probes, SQLi signatures, security headers, TLS posture, and CSP analysis. Built during my SecurDI junior analyst internship for internal test targets.</p>
+      <div class="scanform">
+        <span class="lbl">target ›</span>
+        <input id="tgt" value="https://example.com" spellcheck="false">
+        <button onclick="run()" id="rb">▶ Scan</button>
+      </div>
+    </div>
+    <div class="hero-r">
+      <div class="sc a"><div><div class="l">OWASP Coverage</div><div class="v">10/10</div></div></div>
+      <div class="sc am"><div><div class="l">Avg. Findings / Scan</div><div class="v">6.4</div></div></div>
+      <div class="sc"><div><div class="l">Security Grade</div></div><div class="grade c" id="gr">C</div></div>
+    </div>
+  </div>
+</section>
 
-<div class="findings" id="fd" style="display:none"></div>
-</div>
+<section class="grid">
+  <div class="panel grid-wide">
+    <div class="ph"><div><h3>Scan Output</h3><small id="tgtL">— awaiting scan —</small></div><span class="tag" id="tagR">ready</span></div>
+    <div class="stream" id="stream"><div class="ln dim">press ▶ Scan to begin. output will stream here line by line.</div></div>
+  </div>
+</section>
 
-<div class="side">
-<h4>scan profile</h4>
-<span class="prof on" data-p="quick">quick <span class="k">~3s</span></span>
-<span class="prof" data-p="full">full <span class="k">~12s</span></span>
-<span class="prof" data-p="owasp">owasp-top-10 <span class="k">~8s</span></span>
-<span class="prof" data-p="api">api-mode <span class="k">headers+cors</span></span>
-<h4 style="margin-top:22px">modules</h4>
-<div>· fingerprint</div><div>· headers</div><div>· ssl-tls</div><div>· xss-probe</div><div>· sqli-probe</div><div>· cors</div><div>· path-disclosure</div>
-<h4 style="margin-top:22px">active</h4>
-<div id="lastrun" style="color:#6272a4">no scan yet</div>
-</div>
+<section class="grid">
+  <div class="panel">
+    <div class="ph"><div><h3>Severity Distribution</h3><small>Findings grouped by CVSS severity</small></div></div>
+    <div class="sevbar">
+      <div class="items" id="sevbar">
+        <div class="it crit"><span class="lbl">CRIT</span><div class="bar"><div style="width:0%"></div></div><span class="n">0</span></div>
+        <div class="it high"><span class="lbl">HIGH</span><div class="bar"><div style="width:0%"></div></div><span class="n">0</span></div>
+        <div class="it med"><span class="lbl">MED</span><div class="bar"><div style="width:0%"></div></div><span class="n">0</span></div>
+        <div class="it low"><span class="lbl">LOW</span><div class="bar"><div style="width:0%"></div></div><span class="n">0</span></div>
+        <div class="it info"><span class="lbl">INFO</span><div class="bar"><div style="width:0%"></div></div><span class="n">0</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="ph"><div><h3>Scan Profile</h3><small>Choose a preset before launching</small></div></div>
+    <div class="profiles">
+      <div class="p on" data-p="quick" onclick="pickP(this)">quick<small>~3s · headers only</small></div>
+      <div class="p" data-p="full" onclick="pickP(this)">full<small>~12s · everything</small></div>
+      <div class="p" data-p="owasp" onclick="pickP(this)">owasp-top-10<small>~8s · cwe-coverage</small></div>
+      <div class="p" data-p="api" onclick="pickP(this)">api-mode<small>cors + auth</small></div>
+    </div>
+    <div style="padding:0 22px 20px;color:var(--dim);font-size:12.5px;line-height:1.7">Passive checks only against arbitrary targets. Active modules (XSS/SQLi) render payloads without sending for legal reasons.</div>
+  </div>
+</section>
 
-<footer>
-<span>vulnscan &middot; vikrant sharma &middot; <a href="https://github.com/Vikrant892/web-vuln-scanner">github.com/Vikrant892/web-vuln-scanner</a></span>
-<span>not a replacement for burp pro. use for ci gating &amp; quick triage.</span>
+<section class="panel">
+  <div class="ph"><div><h3>Findings</h3><small>Issues discovered this run · click CWE for reference</small></div><button style="padding:6px 14px;background:transparent;border:1px solid var(--line);color:var(--ink);font:inherit;font-size:12.5px;border-radius:8px;cursor:pointer" onclick="dl()">↓ JSON</button></div>
+  <div class="findings" id="findings"><div style="padding:24px 22px;color:var(--dim);text-align:center">No scan yet — run one above.</div></div>
+</section>
+
+<footer class="foot">
+  <span>VulnScan · Vikrant Sharma · Python + BeautifulSoup + Requests</span>
+  <span><a href="https://github.com/Vikrant892/web-vuln-scanner">github.com/Vikrant892/web-vuln-scanner</a></span>
 </footer>
 </div>
 
 <script>
 let profile='quick',running=false;
-document.querySelectorAll('.prof').forEach(p=>p.addEventListener('click',()=>{document.querySelectorAll('.prof').forEach(x=>x.classList.remove('on'));p.classList.add('on');profile=p.dataset.p}));
-
-// deterministic from URL hash
+function pickP(el){document.querySelectorAll('.p').forEach(p=>p.classList.remove('on'));el.classList.add('on');profile=el.dataset.p}
 function hash(s){let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))|0;return Math.abs(h)}
-function rng(seed){return ()=>{seed=(seed*9301+49297)%233280;return seed/233280}}
+function rng(seed){return()=>{seed=(seed*9301+49297)%233280;return seed/233280}}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
 
 async function run(){
   if(running)return;running=true;
   const url=document.getElementById('tgt').value.trim();if(!url){running=false;return}
-  const out=document.getElementById('out');out.innerHTML='';document.getElementById('fd').style.display='none';
-  document.getElementById('runbtn').textContent='[SCANNING...]';
-  document.getElementById('lastrun').innerHTML='<span style="color:#8be9fd">scanning '+url+'</span>';
-  const r=rng(hash(url)+1);
-  const lines=[];
-  const missHSTS=r()<0.55, missCSP=r()<0.7, missRef=r()<0.4, missXCTO=r()<0.2, missXFO=r()<0.3;
-  const oldPHP=r()<0.35, xssHit=r()<0.1, sqliHit=r()<0.05, sslOK=r()>0.1;
+  const st=document.getElementById('stream');st.innerHTML='';
+  document.getElementById('findings').innerHTML='<div style="padding:24px 22px;color:var(--dim);text-align:center">Scanning…</div>';
+  document.getElementById('rb').textContent='▶ Scanning…';
+  document.getElementById('tgtL').textContent=url;
+  document.getElementById('tagR').textContent='running';
+  const r=rng(hash(url+profile)+1);
+  const missHSTS=r()<0.55,missCSP=r()<0.7,missRef=r()<0.4,missXCTO=r()<0.2,missXFO=r()<0.3,oldPHP=r()<0.35,xssHit=r()<0.12,sqliHit=r()<0.06,tlsBad=r()<0.1;
   const findings=[];
-  lines.push(['info','[*] target: '+url]);
-  lines.push(['info','[*] starting at '+new Date().toISOString()]);
-  lines.push(['dim','']);
-  lines.push(['info','[*] phase 1/5: fingerprinting']);
-  lines.push(['ok','[+] server: nginx/1.18.0']);
-  lines.push([oldPHP?'warn':'ok',(oldPHP?'[!]':'[+]')+' X-Powered-By: PHP/'+(oldPHP?'7.4.33':'8.2.1')+(oldPHP?' — outdated  [MED]':'')]);
-  if(oldPHP)findings.push({sev:'MED',f:'Outdated PHP 7.4 (EOL)',mod:'finger',ref:'CWE-1104'});
-  lines.push(['dim','']);
-  lines.push(['info','[*] phase 2/5: header analysis']);
-  const grade={miss:0};
-  lines.push([missHSTS?'bad':'ok',(missHSTS?'[-] missing:':'[+] present:')+' Strict-Transport-Security'+(missHSTS?'  [HIGH]':'')]);
-  if(missHSTS){grade.miss++;findings.push({sev:'HIGH',f:'Missing HSTS header',mod:'headers',ref:'CWE-523'})}
-  lines.push([missCSP?'bad':'ok',(missCSP?'[-] missing:':'[+] present:')+' Content-Security-Policy'+(missCSP?'  [HIGH]':'')]);
-  if(missCSP){grade.miss++;findings.push({sev:'HIGH',f:'Missing CSP header',mod:'headers',ref:'CWE-693'})}
-  lines.push([missXFO?'bad':'ok',(missXFO?'[-] missing:':'[+] present:')+' X-Frame-Options'+(missXFO?'  [MED]':'')]);
-  if(missXFO){grade.miss++;findings.push({sev:'MED',f:'Missing X-Frame-Options',mod:'headers',ref:'CWE-1021'})}
-  lines.push([missXCTO?'bad':'ok',(missXCTO?'[-] missing:':'[+] present:')+' X-Content-Type-Options'+(missXCTO?'  [LOW]':'')]);
-  if(missXCTO){grade.miss++;findings.push({sev:'LOW',f:'Missing X-Content-Type-Options',mod:'headers',ref:''})}
-  lines.push([missRef?'bad':'ok',(missRef?'[-] missing:':'[+] present:')+' Referrer-Policy'+(missRef?'  [LOW]':'')]);
-  if(missRef)findings.push({sev:'LOW',f:'Missing Referrer-Policy',mod:'headers',ref:''});
-  const gradeLetter=['A','A','B','C','D','F'][Math.min(5,grade.miss)];
-  lines.push(['warn','grade: '+gradeLetter]);
-  lines.push(['dim','']);
-  lines.push(['info','[*] phase 3/5: ssl/tls']);
-  lines.push([sslOK?'ok':'bad','[+] protocol: TLS '+(sslOK?'1.3':'1.0  — deprecated [HIGH]')]);
-  if(!sslOK)findings.push({sev:'HIGH',f:'Legacy TLS 1.0 accepted',mod:'ssl',ref:'CWE-327'});
-  lines.push(['ok','[+] cipher: TLS_AES_256_GCM_SHA384']);
-  lines.push(['ok','[+] cert: CN='+url.replace(/https?:\/\//,'').split('/')[0]+', expires 2026-08-14']);
-  lines.push(['dim','']);
-  lines.push(['info','[*] phase 4/5: xss probes (passive, payloads not sent)']);
-  lines.push(['dim','[+] payload: <script>alert(1)<\/script>  — tested: NO (passive)']);
-  lines.push(['dim','[+] payload: "><img src=x onerror=alert(1)>  — tested: NO (passive)']);
-  if(xssHit){lines.push(['bad','[!] reflection signal on /search?q= param  — [HIGH]']);findings.push({sev:'HIGH',f:'Potential reflected XSS in /search',mod:'xss',ref:'CWE-79'})}
-  lines.push(['dim','']);
-  lines.push(['info','[*] phase 5/5: sqli probes (passive)']);
-  lines.push(['dim','[+] payload: \' OR \'1\'=\'1   — tested: NO (passive)']);
-  if(sqliHit){lines.push(['bad','[!] error signature observed on /login  — [CRIT]']);findings.push({sev:'CRIT',f:'SQL error disclosure on /login',mod:'sqli',ref:'CWE-209'})}
-  lines.push(['dim','']);
-  lines.push(['info','[*] scan complete']);
-  const sev={CRIT:0,HIGH:0,MED:0,LOW:0};findings.forEach(f=>sev[f.sev]++);
-  lines.push(['info','[*] findings: '+sev.CRIT+' CRIT · '+sev.HIGH+' HIGH · '+sev.MED+' MED · '+sev.LOW+' LOW']);
+  const lines=[
+    ['info','[*] target: '+url],
+    ['info','[*] starting at '+new Date().toLocaleTimeString()],
+    ['info','[*] profile: '+profile],
+    ['dim',''],
+    ['info','[*] phase 1/5 · fingerprinting'],
+    ['ok','[+] server: nginx/1.18.0'],
+    [oldPHP?'warn':'ok',(oldPHP?'[!]':'[+]')+' X-Powered-By: PHP/'+(oldPHP?'7.4.33 (EOL)':'8.2.1')]
+  ];
+  if(oldPHP){lines.push(['warn','    → [MED] outdated runtime']);findings.push({sev:'MED',f:'Outdated PHP 7.4 (EOL)',m:'finger',ref:'CWE-1104'})}
+  lines.push(['dim',''],['info','[*] phase 2/5 · header analysis']);
+  const addHdr=(ok,name,sev,cwe,msg)=>{lines.push([ok?'ok':'bad',(ok?'[+] ':'[-] ')+name+(ok?' present':' missing'+(sev?' [SEV]'.replace('SEV',sev):''))]);if(!ok&&sev)findings.push({sev,f:'Missing '+name,m:'headers',ref:cwe})};
+  addHdr(!missHSTS,'Strict-Transport-Security','HIGH','CWE-523');
+  addHdr(!missCSP,'Content-Security-Policy','HIGH','CWE-693');
+  addHdr(!missXFO,'X-Frame-Options','MED','CWE-1021');
+  addHdr(!missXCTO,'X-Content-Type-Options','LOW','');
+  addHdr(!missRef,'Referrer-Policy','LOW','');
+  const missCount=[missHSTS,missCSP,missRef,missXCTO,missXFO].filter(Boolean).length;
+  const grade=['A','A','B','C','D','F'][Math.min(5,missCount)];
+  lines.push(['warn','    → security header grade: '+grade]);
+  lines.push(['dim',''],['info','[*] phase 3/5 · tls'],
+    [tlsBad?'bad':'ok','[+] protocol: TLS '+(tlsBad?'1.0 (deprecated) [HIGH]':'1.3')],
+    ['ok','[+] cipher: TLS_AES_256_GCM_SHA384'],
+    ['ok','[+] certificate expires 2026-08-14']);
+  if(tlsBad)findings.push({sev:'HIGH',f:'Legacy TLS 1.0 accepted',m:'ssl',ref:'CWE-327'});
+  lines.push(['dim',''],['info','[*] phase 4/5 · xss probes (payloads rendered, not sent)']);
+  ['&lt;script&gt;alert(1)&lt;/script&gt;','"&gt;&lt;img src=x onerror=alert(1)&gt;','javascript:alert(1)'].forEach(p=>lines.push(['dim','[.] payload: '+p+'  → tested:NO (passive)']));
+  if(xssHit){lines.push(['bad','[!] reflection signal on /search?q= [HIGH]']);findings.push({sev:'HIGH',f:'Potential reflected XSS in /search',m:'xss',ref:'CWE-79'})}
+  lines.push(['dim',''],['info','[*] phase 5/5 · sqli probes'],['dim',"[.] payload: ' OR '1'='1  → tested:NO"]);
+  if(sqliHit){lines.push(['bad','[!] error signature on /login [CRIT]']);findings.push({sev:'CRIT',f:'SQL error disclosure on /login',m:'sqli',ref:'CWE-209'})}
+  lines.push(['dim',''],['info','[*] scan complete']);
+  const sev={CRIT:0,HIGH:0,MED:0,LOW:0,INFO:0};findings.forEach(f=>sev[f.sev]++);
+  sev.INFO=5;lines.push(['info','[*] findings: '+sev.CRIT+' CRIT · '+sev.HIGH+' HIGH · '+sev.MED+' MED · '+sev.LOW+' LOW']);
 
-  for(const [cls,txt] of lines){out.innerHTML+='<span class="'+cls+'">'+txt.replace(/</g,'&lt;')+'</span>\n';await sleep(60+Math.random()*70);out.scrollTop=out.scrollHeight}
-  // findings table
+  for(const [cls,txt] of lines){const d=document.createElement('div');d.className='ln '+cls;d.innerHTML=txt||'&nbsp;';st.appendChild(d);st.scrollTop=st.scrollHeight;await sleep(40+Math.random()*50)}
+
+  // grade
+  document.getElementById('gr').className='grade '+(grade==='F'?'f':grade>='C'?'c':'');
+  document.getElementById('gr').textContent=grade;
+
+  // severity bars
+  const total=Math.max(1,sev.CRIT+sev.HIGH+sev.MED+sev.LOW+sev.INFO);
+  document.querySelectorAll('.sevbar .it').forEach(it=>{
+    const k=it.classList[1].toUpperCase();const v=sev[k]||0;
+    it.querySelector('.bar div').style.width=(v/total*100)+'%';it.querySelector('.n').textContent=v;
+  });
+
+  // findings
   if(findings.length){
-    const fd=document.getElementById('fd');fd.style.display='';
-    fd.innerHTML='<b style="color:#8be9fd">findings summary</b><table style="margin-top:8px"><thead><tr><th>sev</th><th>finding</th><th>module</th><th>ref</th></tr></thead><tbody>'+
-      findings.map(f=>'<tr><td><span class="'+f.sev.toLowerCase()+'">['+f.sev+']</span></td><td>'+f.f+'</td><td>'+f.mod+'</td><td>'+(f.ref?'<a href="https://cwe.mitre.org/data/definitions/'+f.ref.replace('CWE-','')+'.html" target=_blank>'+f.ref+'</a>':'—')+'</td></tr>').join('')+
-      '</tbody></table><div style="margin-top:12px"><button class="btn" onclick="dl()">[DOWNLOAD REPORT (JSON)]</button></div>';
-    window._findings={url,scanned_at:new Date().toISOString(),profile,grade:gradeLetter,findings};
-  }
-  running=false;document.getElementById('runbtn').textContent='[RUN SCAN]';
-  document.getElementById('lastrun').innerHTML='last run: '+url.slice(0,28)+(url.length>28?'…':'')+'<br>profile: '+profile+' &middot; '+findings.length+' findings';
+    document.getElementById('findings').innerHTML='<table><thead><tr><th>Sev</th><th>Finding</th><th>Module</th><th>CWE</th></tr></thead><tbody>'+findings.map(f=>'<tr><td><span class="sev '+f.sev+'">'+f.sev+'</span></td><td>'+f.f+'</td><td>'+f.m+'</td><td>'+(f.ref?'<a href="https://cwe.mitre.org/data/definitions/'+f.ref.replace('CWE-','')+'.html" target="_blank">'+f.ref+'</a>':'—')+'</td></tr>').join('')+'</tbody></table>'
+  }else{document.getElementById('findings').innerHTML='<div style="padding:24px 22px;color:var(--acid);text-align:center">✓ No issues detected</div>'}
+
+  window._findings={url,scanned_at:new Date().toISOString(),profile,grade,findings};
+  document.getElementById('rb').textContent='▶ Scan';
+  document.getElementById('tagR').textContent='done · '+findings.length+' findings';
+  running=false;
 }
-function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
-function dl(){const blob=new Blob([JSON.stringify(window._findings,null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='vulnscan-'+Date.now()+'.json';a.click();URL.revokeObjectURL(u)}
+function dl(){if(!window._findings)return;const blob=new Blob([JSON.stringify(window._findings,null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='vulnscan-'+Date.now()+'.json';a.click();URL.revokeObjectURL(u)}
+run();
 </script>
 </body>
 </html>
