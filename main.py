@@ -28,9 +28,9 @@ RESET = "\033[0m"
 BOLD = "\033[1m"
 
 BANNER = f"""
-{RED}╦ ╦╔═╗╔╗   {CYAN}╦  ╦╦ ╦╦  ╔╗╔  {YELLOW}╔═╗╔═╗╔═╗╔╗╔
-{RED}║║║║╣ ╠╩╗  {CYAN}╚╗╔╝║ ║║  ║║║  {YELLOW}╚═╗║  ╠═╣║║║
-{RED}╚╩╝╚═╝╚═╝  {CYAN} ╚╝ ╚═╝╩═╝╝╚╝  {YELLOW}╚═╝╚═╝╩ ╩╝╚╝{RESET}
+{RED}╦ ╦╔╗╔╗   {CYAN}╦  ╦╦ ╦╦  ╔╗╔  {YELLOW}╔╗╔╗╔╗╔╗╔
+{RED}║║║║╣ ╠╩╗  {CYAN}╚╗╔╝║ ║║  ║║║  {YELLOW}╚╗║  ╠╣║║║
+{RED}╚╩╝╚╝╚╝  {CYAN} ╚╝ ╚╝╩╝╝╚╝  {YELLOW}╚╝╚╝╩ ╩╝╚╝{RESET}
 
     {BOLD}OWASP Web Vulnerability Scanner v1.0{RESET}
     {YELLOW}For educational and authorized testing ONLY{RESET}
@@ -90,9 +90,9 @@ def run_scan(args):
     # step 1: crawl the target (unless skipped or just doing headers/ssl/dirs)
     crawl_results = None
     if scan_type in ["all", "xss", "sqli", "crawl"] and not args.no_crawl:
-        print(f"\n{BLUE}{'─' * 60}{RESET}")
+        print(f"\n{BLUE}{'' * 60}{RESET}")
         print(f"{BOLD}  PHASE 1: Crawling{RESET}")
-        print(f"{BLUE}{'─' * 60}{RESET}")
+        print(f"{BLUE}{'' * 60}{RESET}")
 
         crawler = Crawler(args.url, max_depth=args.depth, max_pages=args.max_pages)
         crawl_results = crawler.crawl()
@@ -105,45 +105,45 @@ def run_scan(args):
 
     # step 2: run the selected scanners
     if scan_type in ["all", "xss"] and crawl_results:
-        print(f"\n{BLUE}{'─' * 60}{RESET}")
+        print(f"\n{BLUE}{'' * 60}{RESET}")
         print(f"{BOLD}  PHASE 2: XSS Scanning{RESET}")
-        print(f"{BLUE}{'─' * 60}{RESET}")
+        print(f"{BLUE}{'' * 60}{RESET}")
 
         xss = XSSScanner()
         findings = xss.scan(crawl_results)
         all_findings.extend(findings)
 
     if scan_type in ["all", "sqli"] and crawl_results:
-        print(f"\n{BLUE}{'─' * 60}{RESET}")
+        print(f"\n{BLUE}{'' * 60}{RESET}")
         print(f"{BOLD}  PHASE 3: SQL Injection Scanning{RESET}")
-        print(f"{BLUE}{'─' * 60}{RESET}")
+        print(f"{BLUE}{'' * 60}{RESET}")
 
         sqli = SQLiScanner()
         findings = sqli.scan(crawl_results)
         all_findings.extend(findings)
 
     if scan_type in ["all", "headers"]:
-        print(f"\n{BLUE}{'─' * 60}{RESET}")
+        print(f"\n{BLUE}{'' * 60}{RESET}")
         print(f"{BOLD}  PHASE 4: Security Headers Check{RESET}")
-        print(f"{BLUE}{'─' * 60}{RESET}")
+        print(f"{BLUE}{'' * 60}{RESET}")
 
         headers = HeaderChecker()
         findings = headers.scan(args.url)
         all_findings.extend(findings)
 
     if scan_type in ["all", "ssl"]:
-        print(f"\n{BLUE}{'─' * 60}{RESET}")
+        print(f"\n{BLUE}{'' * 60}{RESET}")
         print(f"{BOLD}  PHASE 5: SSL/TLS Check{RESET}")
-        print(f"{BLUE}{'─' * 60}{RESET}")
+        print(f"{BLUE}{'' * 60}{RESET}")
 
         ssl_checker = SSLChecker()
         findings = ssl_checker.scan(args.url)
         all_findings.extend(findings)
 
     if scan_type in ["all", "dirs"]:
-        print(f"\n{BLUE}{'─' * 60}{RESET}")
+        print(f"\n{BLUE}{'' * 60}{RESET}")
         print(f"{BOLD}  PHASE 6: Directory Bruteforce{RESET}")
-        print(f"{BLUE}{'─' * 60}{RESET}")
+        print(f"{BLUE}{'' * 60}{RESET}")
 
         dirb = DirBruteforcer(threads=args.threads)
         findings = dirb.scan(args.url)

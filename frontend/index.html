@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>VulnScan — Web Vulnerability Assessment</title>
+<title>VulnScan - Web Vulnerability Assessment</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -133,7 +133,7 @@ html,body{background:var(--bg);color:var(--ink);font-family:'Space Grotesk',syst
   <div class="hero-inner">
     <div>
       <h2>Find what's <span class="r">broken</span>.<br>Before they do.</h2>
-      <p>Passive web vulnerability scanner for OWASP Top 10 coverage — XSS probes, SQLi signatures, security headers, TLS posture, and CSP analysis. Built during my SecurDI junior analyst internship for internal test targets.</p>
+      <p>Passive web vulnerability scanner for OWASP Top 10 coverage - XSS probes, SQLi signatures, security headers, TLS posture, and CSP analysis. Built during my SecurDI junior analyst internship for internal test targets.</p>
       <div class="scanform">
         <span class="lbl">target ›</span>
         <input id="tgt" value="https://example.com" spellcheck="false">
@@ -150,7 +150,7 @@ html,body{background:var(--bg);color:var(--ink);font-family:'Space Grotesk',syst
 
 <section class="grid">
   <div class="panel grid-wide">
-    <div class="ph"><div><h3>Scan Output</h3><small id="tgtL">— awaiting scan —</small></div><span class="tag" id="tagR">ready</span></div>
+    <div class="ph"><div><h3>Scan Output</h3><small id="tgtL">- awaiting scan -</small></div><span class="tag" id="tagR">ready</span></div>
     <div class="stream" id="stream"><div class="ln dim">press ▶ Scan to begin. output will stream here line by line.</div></div>
   </div>
 </section>
@@ -182,7 +182,7 @@ html,body{background:var(--bg);color:var(--ink);font-family:'Space Grotesk',syst
 
 <section class="panel">
   <div class="ph"><div><h3>Findings</h3><small>Issues discovered this run · click CWE for reference</small></div><button style="padding:6px 14px;background:transparent;border:1px solid var(--line);color:var(--ink);font:inherit;font-size:12.5px;border-radius:8px;cursor:pointer" onclick="dl()">↓ JSON</button></div>
-  <div class="findings" id="findings"><div style="padding:24px 22px;color:var(--dim);text-align:center">No scan yet — run one above.</div></div>
+  <div class="findings" id="findings"><div style="padding:24px 22px;color:var(--dim);text-align:center">No scan yet - run one above.</div></div>
 </section>
 
 <footer class="foot">
@@ -202,8 +202,8 @@ async function run(){
   if(running)return;running=true;
   const url=document.getElementById('tgt').value.trim();if(!url){running=false;return}
   const st=document.getElementById('stream');st.innerHTML='';
-  document.getElementById('findings').innerHTML='<div style="padding:24px 22px;color:var(--dim);text-align:center">Scanning…</div>';
-  document.getElementById('rb').textContent='▶ Scanning…';
+  document.getElementById('findings').innerHTML='<div style="padding:24px 22px;color:var(--dim);text-align:center">Scanning...</div>';
+  document.getElementById('rb').textContent='▶ Scanning...';
   document.getElementById('tgtL').textContent=url;
   document.getElementById('tagR').textContent='running';
   const r=rng(hash(url+profile)+1);
@@ -258,7 +258,7 @@ async function run(){
 
   // findings
   if(findings.length){
-    document.getElementById('findings').innerHTML='<table><thead><tr><th>Sev</th><th>Finding</th><th>Module</th><th>CWE</th></tr></thead><tbody>'+findings.map(f=>'<tr><td><span class="sev '+f.sev+'">'+f.sev+'</span></td><td>'+f.f+'</td><td>'+f.m+'</td><td>'+(f.ref?'<a href="https://cwe.mitre.org/data/definitions/'+f.ref.replace('CWE-','')+'.html" target="_blank">'+f.ref+'</a>':'—')+'</td></tr>').join('')+'</tbody></table>'
+    document.getElementById('findings').innerHTML='<table><thead><tr><th>Sev</th><th>Finding</th><th>Module</th><th>CWE</th></tr></thead><tbody>'+findings.map(f=>'<tr><td><span class="sev '+f.sev+'">'+f.sev+'</span></td><td>'+f.f+'</td><td>'+f.m+'</td><td>'+(f.ref?'<a href="https://cwe.mitre.org/data/definitions/'+f.ref.replace('CWE-','')+'.html" target="_blank">'+f.ref+'</a>':'-')+'</td></tr>').join('')+'</tbody></table>'
   }else{document.getElementById('findings').innerHTML='<div style="padding:24px 22px;color:var(--acid);text-align:center">✓ No issues detected</div>'}
 
   window._findings={url,scanned_at:new Date().toISOString(),profile,grade,findings};

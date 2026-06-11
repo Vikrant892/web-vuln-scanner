@@ -80,7 +80,7 @@ class HeaderChecker:
         response_headers = {k.lower(): v for k, v in resp.headers.items()}
 
         print(f"\n    {'Header':<35} {'Status':<10} {'Severity'}")
-        print(f"    {'─' * 35} {'─' * 10} {'─' * 10}")
+        print(f"    {'' * 35} {'' * 10} {'' * 10}")
 
         for header, info in SECURITY_HEADERS.items():
             if header.lower() in response_headers:
